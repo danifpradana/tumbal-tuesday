@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TUMBAL TUESDAY | Digital Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #ff00ff;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        .glitch {
+            position: relative;
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-2px, 2px) }
+            40% { transform: translate(-2px, -2px) }
+            60% { transform: translate(2px, 2px) }
+            80% { transform: translate(2px, -2px) }
+            100% { transform: translate(0) }
+        }
+
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeOut 3s ease-in-out 2s forwards;
+        }
+
+        .loading-text {
+            font-size: 2rem;
+            color: #00ff00;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1 }
+            50% { opacity: 0.3 }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; visibility: hidden; }
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            text-align: center;
+            z-index: 100;
+            border-bottom: 2px solid #ff00ff;
+        }
+
+        .title {
+            font-size: clamp(2rem, 8vw, 6rem);
+            font-weight: bold;
+            text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff;
+            margin-bottom: 10px;
+            animation: colorCycle 3s infinite;
+        }
+
+        @keyframes colorCycle {
+            0% { color: #ff00ff; }
+            33% { color: #00ffff; }
+            66% { color: #ffff00; }
+            100% { color: #ff00ff; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #00ff00;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+        }
+
+        .nav-matrix {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: 1px solid #ff00ff;
+            color: #ff00ff;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-btn:hover {
+            background: #ff00ff;
+            color: #000;
+            box-shadow: 0 0 20px #ff00ff;
+        }
+
+        .gallery-container {
+            padding: 40px 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .artwork-frame {
+            position: relative;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
+            padding: 4px;
+            border-radius: 10px;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .artwork-frame:hover {
+            transform: scale(1.05) rotate(1deg);
+            box-shadow: 0 20px 40px rgba(255, 0, 255, 0.5);
+        }
+
+        .artwork-inner {
+            background: #000;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .artwork-frame iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+            display: block;
+        }
+
+        .artwork-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+        }
+
+        .artwork-frame:hover .artwork-overlay {
+            opacity: 1;
+        }
+
+        .artwork-info {
+            color: #fff;
+            font-size: 0.9rem;
+        }
+
+        .content-sections {
+            margin-top: 80px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            padding: 40px;
+            background: linear-gradient(135deg, rgba(255,0,255,0.1), rgba(0,255,255,0.1));
+            border: 1px solid rgba(255,0,255,0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: #00ffff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border-bottom: 2px solid #00ffff;
+            padding-bottom: 10px;
+        }
+
+        .section-content {
+            line-height: 1.8;
+            color: #fff;
+        }
+
+        .section-content h3 {
+            color: #ffff00;
+            margin: 20px 0 10px 0;
+            font-size: 1.3rem;
+        }
+
+        .section-content h4 {
+            color: #ff00ff;
+            margin: 15px 0 8px 0;
+        }
+
+        .tech-specs {
+            background: rgba(0,255,0,0.1);
+            padding: 20px;
+            border-left: 4px solid #00ff00;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 60px 20px;
+            border-top: 2px solid #ff00ff;
+            background: linear-gradient(45deg, rgba(255,0,255,0.2), rgba(0,255,255,0.2));
+        }
+
+        .artist-credit {
+            font-size: 1.5rem;
+            color: #ffff00;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+        }
+
+        .portfolio-link {
+            color: #00ffff;
+            text-decoration: none;
+            font-size: 1.2rem;
+            border: 2px solid #00ffff;
+            padding: 15px 30px;
+            display: inline-block;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .portfolio-link:hover {
+            background: #00ffff;
+            color: #000;
+            box-shadow: 0 0 30px #00ffff;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+            background-image: 
+                linear-gradient(rgba(255,0,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,0,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: matrix-scroll 20s linear infinite;
+        }
+
+        @keyframes matrix-scroll {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+
+        .data-stream {
+            position: fixed;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8rem;
+            color: #00ff00;
+            opacity: 0.6;
+            writing-mode: vertical-rl;
+            z-index: 1;
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff00ff, transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            mix-blend-mode: screen;
+        }
+
+        /* LIGHTBOX */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .lightbox.active {
+            display: flex;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 90vh;
+            background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00);
+            padding: 4px;
+            border-radius: 15px;
+        }
+
+        .lightbox-inner {
+            background: #000;
+            border-radius: 11px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .lightbox iframe {
+            width: 80vw;
+            height: 80vh;
+            border: none;
+            display: block;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: -50px;
+            right: -10px;
+            background: transparent;
+            border: 2px solid #ff00ff;
+            color: #ff00ff;
+            font-size: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .lightbox-close:hover {
+            background: #ff00ff;
+            color: #000;
+            box-shadow: 0 0 20px #ff00ff;
+            transform: rotate(90deg);
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            font-size: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .lightbox-nav:hover {
+            background: #00ffff;
+            color: #000;
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        .lightbox-prev {
+            left: -80px;
+        }
+
+        .lightbox-next {
+            right: -80px;
+        }
+
+        .lightbox-title {
+            position: absolute;
+            bottom: -60px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #ffff00;
+            font-size: 1.5rem;
+            font-family: 'Courier New', monospace;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px #ffff00;
+        }
+
+        @media (max-width: 768px) {
+            .nav-matrix { flex-direction: column; align-items: center; }
+            .section { padding: 20px; margin: 20px 10px; }
+            .data-stream { display: none; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            
+            .lightbox iframe {
+                width: 95vw;
+                height: 70vh;
+            }
+            
+            .lightbox-close {
+                top: -40px;
+                right: 0;
+                font-size: 1.5rem;
+                width: 40px;
+                height: 40px;
+            }
+            
+            .lightbox-nav {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .lightbox-prev {
+                left: -60px;
+            }
+            
+            .lightbox-next {
+                right: -60px;
+            }
+            
+            .lightbox-title {
+                bottom: -50px;
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-screen">
+        <div class="loading-text glitch">INITIATING DIGITAL SÉANCE...</div>
+    </div>
+
+    <div class="matrix-bg"></div>
+    <div class="data-stream">CONTEXT_DATA // SUBJECT_ANALYSIS // VISUAL_PROCESS // CREATED_BY_DAN_PRADANA_MXVDXN_2025</div>
+
+    <header class="header">
+        <h1 class="title glitch">TUMBAL TUESDAY</h1>
+        <p class="subtitle">BLESSED. POSSESSED. OBSESSED.</p>
+        <nav class="nav-matrix">
+            <button class="nav-btn" onclick="scrollToSection('context')">CONTEXT_DATA</button>
+            <button class="nav-btn" onclick="scrollToSection('analysis')">SUBJECT_ANALYSIS</button>
+            <button class="nav-btn" onclick="scrollToSection('process')">VISUAL_PROCESS</button>
+            <button class="nav-btn" onclick="scrollToSection('gallery')">GALLERY</button>
+        </nav>
+    </header>
+
+    <div class="gallery-container">
+        <section id="gallery" class="gallery-grid">
+            <div class="artwork-frame" data-index="0">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1J_9-n9Rm0_g45PbhcvIh-bOWfKAPvS2O/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">HER_KEBAYA_BLESSED</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="artwork-frame" data-index="1">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1hoi7sh3-uCFXx1A6Yv-XyzjOjI9SO_6I/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">CURSED_CUTE_AFTERCLASS</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="2">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1HxWY95o3-L0j5IwLrzqtfNKJee0_oHyA/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">DIGITAL_POSSESSION_SEQUENCE</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="3">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1jgLLbiMTa_nMrFjOYx-_ApAlhJcAkMFd/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">HORNY_SPIRITS_INTERFACE</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="4">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1HkNTGbl_e7OnwllHifjV0jCrwPwrxb3E/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">PRAY_SLAY_DUALITY</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="5">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1NlOAIDEnCM0XrXUDgS4UtZH-al0OvTOy/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">COSMIC_DIGITAL_DIMENSION</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="6">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1GIeOWGeSrFayyxqXfNpCc2o2I5rk1mIk/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">HONEY_SIN_COLLISION</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="7">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1K1pJbDxdFwpC1_CXC7OQWHZHg5gdXhFj/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">GOLD_DIGITAL_ARMOR</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="8">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1BjPl72HC1gay-WPSWmO5irFB6NLdymTv/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">RICE_FIELD_MYSTICISM</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="9">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1pDLMYGnaq5XRaAzuyJ-CHDX0mP2ZzBu1/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">COLD_BODY_HOT_MILK</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="10">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1KB8-TYOrd5VOQ94VRT8Tuf5Q3yVeEKYz/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">TRADITIONAL_OFFERING_2025</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="11">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1b5L6zsxW1YAFU5KdgYgzmu-Ydosxm5y5/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">ALGORITHM_ANIMISM</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="12">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1mKf_w2L5a2bVnLC4X1Xk5UCrT1p27Ofp/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">CYBER_CULTURAL_FUSION</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NEW ARTWORKS -->
+            <div class="artwork-frame" data-index="13">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1mnoEEajSUbpeKHwwRaOYNpi2BAcyrJ6n/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">HYPNOTIC_SHRINE_MATRIX</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="14">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/1qjDHkPTi37o-eNHNeV8TS0RKepJuuA62/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">DIGITAL_DEVOTION_CASCADE</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="artwork-frame" data-index="15">
+                <div class="artwork-inner">
+                    <iframe src="https://drive.google.com/file/d/13BfR5LMWf2kGmxDfcgzH6afwEMQsBAt1/preview" allow="autoplay"></iframe>
+                    <div class="artwork-overlay">
+                        <div class="artwork-info">SACRED_CODE_TRANSMISSION</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="content-sections">
+            <section id="context" class="section">
+                <h2 class="section-title glitch">CONTEXT_DATA</h2>
+                <div class="section-content">
+                    <p><strong>Project Classification:</strong> Digital Art Series / Cultural Commentary<br>
+                    <strong>Medium:</strong> AI-Generated Hypermaximalist Imagery<br>
+                    <strong>Temporal Framework:</strong> 2025<br>
+                    <strong>Cultural Location:</strong> Digital Nusantara<br>
+                    <strong>Aesthetic Genre:</strong> Indo Chaos Core / Hyperpop Maximalism</p>
+
+                    <h3>Cultural Semantic Map:</h3>
+                    <ul>
+                        <li><strong>Tumbal</strong> → Offering/Sacrifice (Indonesian spiritual practice)</li>
+                        <li><strong>Tuesday</strong> → Peak digital engagement cycle</li>
+                        <li><strong>Kebaya</strong> → Traditional Indonesian feminine armor</li>
+                        <li><strong>Digital Animism</strong> → Algorithm spirits meet ancestral frequencies</li>
+                        <li><strong>After Class</strong> → Liminal space between institutional control and personal rebellion</li>
+                    </ul>
+
+                    <h3>Conceptual Framework:</h3>
+                    <p><em>What offerings do we make to the algorithm gods? What traditions survive the digital apocalypse?</em></p>
+                    
+                    <p><strong>TUMBAL TUESDAY</strong> interrogates the collision between Indonesia's spiritual DNA and hyperconnected reality. Young Indonesians exist in constant translation—between grandmother's prayers and Instagram stories, between traditional gold jewelry and digital accessories, between ancestral wisdom and viral knowledge.</p>
+                    
+                    <p>This series documents digital possession: how Indonesian youth are simultaneously blessed by cultural heritage and cursed by algorithmic feeds, creating new forms of sacred maximalism.</p>
+                </div>
+            </section>
+
+            <section id="analysis" class="section">
+                <h2 class="section-title glitch">SUBJECT_ANALYSIS</h2>
+                <div class="section-content">
+                    <h3>Primary Visual Subjects:</h3>
+                    <p><strong>The Indonesian Digital Native</strong> - School-uniformed figures as cultural conduits, traditional accessories weaponized as identity markers within institutional frameworks.</p>
+                    
+                    <p><strong>Kebaya Cyber-Warriors</strong> - Traditional feminine dress recontextualized as digital battle armor, gold jewelry functioning as data shields against cultural colonization.</p>
+                    
+                    <p><strong>Sacred Profane Interfaces</strong> - Religious iconography collides with social media UX, creating new forms of digital devotion and viral mysticism.</p>
+                    
+                    <p><strong>Hyperlocal Maximalism</strong> - Indonesian cultural elements exploded through digital chaos, traditional patterns fragmented into pixel art.</p>
+
+                    <h3>Thematic Deconstruction:</h3>
+                    
+                    <h4>1. Digital Animism</h4>
+                    <p>Traditional Indonesian belief systems (spirits in objects) translated to digital realm (algorithms as modern bomoh/shamans). Social media feeds become divination tools, engagement metrics replace spiritual guidance.</p>
+                    
+                    <h4>2. Cultural Code-Switching</h4>
+                    <p>Subjects fluidly navigate between traditional Indonesian values and global digital culture. They're not victims of cultural clash—they're power users, weaponizing tradition for digital relevance.</p>
+                    
+                    <h4>3. Institutional Rebellion</h4>
+                    <p>School uniforms represent conformity, but subjects assert identity through traditional accessories—gold chains, kebaya elements, cultural symbols as resistance tools.</p>
+                    
+                    <h4>4. Temporal Collision</h4>
+                    <p>Past (ancestral wisdom), present (digital reality), and future (hybrid identity) exist simultaneously. Traditional elements aren't museum pieces—they're living technology for navigating complex realities.</p>
+                    
+                    <h4>5. Sacred Consumption</h4>
+                    <p>Indonesian spiritual practice (offerings, devotion, community ritual) recontextualized through social media behavior (posts as offerings, likes as prayers, viral content as collective ritual).</p>
+                </div>
+            </section>
+
+            <section id="process" class="section">
+                <h2 class="section-title glitch">VISUAL_PROCESS</h2>
+                <div class="section-content">
+                    <div class="tech-specs">
+                        <h3>Generation Pipeline:</h3>
+                        <p><strong>Primary Engine:</strong> Google Imagen 4</p>
+                        <p><strong>Secondary Processing:</strong> Seedream AI</p>
+                    </div>
+
+                    <h3>Technical Workflow:</h3>
+                    
+                    <h4>Stage 1: Cultural Foundation Layer</h4>
+                    <p>Base prompting incorporates authentic Indonesian cultural vocabulary: traditional textile patterns, ceremonial jewelry systems, institutional uniforms, musical instruments. Environmental context building: Indonesian educational spaces, traditional architecture, cultural object integration.</p>
+                    
+                    <h4>Stage 2: Digital Chaos Integration</h4>
+                    <p>Maximalist overlay systems: pixel art elements, social media interface aesthetics, neon typography, digital native symbolism. Glitch aesthetic implementation through controlled digital artifact generation.</p>
+                    
+                    <h4>Stage 3: Cultural-Digital Fusion</h4>
+                    <p>Hybrid element synthesis: traditional dress recontextualized through cyberpunk lens, ceremonial objects as digital accessories. Linguistic integration: Indonesian vernacular mixed with global internet communication patterns.</p>
+                    
+                    <h4>Stage 4: Seedream Enhancement</h4>
+                    <p>Detail amplification for cultural elements requiring authenticity and precision. Texture refinement across fabric, metalwork, and traditional material systems. Final color grading for maximum visual impact while preserving cultural integrity.</p>
+
+                    <div class="tech-specs">
+                        <h3>Conceptual Prompt Architecture:</h3>
+                        <p><strong>Cultural Foundation Prompts:</strong> Focus on Indonesian digital native identity, traditional dress systems recontextualized, institutional rebellion through cultural accessories, hyperlocal maximalism, sacred-profane digital interfaces.</p>
+                        
+                        <p><strong>Aesthetic Enhancement Prompts:</strong> Hyperpop Indonesian fusion, digital possession themes, algorithm spirituality, cyber-kebaya aesthetics, maximalist cultural collision, traditional armor for digital battles.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-content">
+            <div class="lightbox-inner">
+                <iframe id="lightbox-iframe" src="" allow="autoplay"></iframe>
+            </div>
+            <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+            <button class="lightbox-nav lightbox-prev" onclick="previousImage()">‹</button>
+            <button class="lightbox-nav lightbox-next" onclick="nextImage()">›</button>
+            <div class="lightbox-title" id="lightbox-title"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="artist-credit glitch">DAN PRADANA / MXVDXN</div>
+        <p style="color: #fff; margin-bottom: 30px;">Digital Artist & Cultural Technologist | 2025</p>
+        <p style="color: #00ff00; margin-bottom: 30px; font-style: italic;">"The spirits are in the machine now. They're not angry—they're adapting."</p>
+        <a href="https://danifpradana.github.io/" class="portfolio-link" target="_blank">VISIT PORTFOLIO</a>
+    </footer>
+
+    <script>
+        // Gallery data - UPDATED array with all 16 artworks
+        const artworks = [
+            {
+                src: "https://drive.google.com/file/d/1J_9-n9Rm0_g45PbhcvIh-bOWfKAPvS2O/preview",
+                title: "HER_KEBAYA_BLESSED"
+            },
+            {
+                src: "https://drive.google.com/file/d/1hoi7sh3-uCFXx1A6Yv-XyzjOjI9SO_6I/preview",
+                title: "CURSED_CUTE_AFTERCLASS"
+            },
+            {
+                src: "https://drive.google.com/file/d/1HxWY95o3-L0j5IwLrzqtfNKJee0_oHyA/preview",
+                title: "DIGITAL_POSSESSION_SEQUENCE"
+            },
+            {
+                src: "https://drive.google.com/file/d/1jgLLbiMTa_nMrFjOYx-_ApAlhJcAkMFd/preview",
+                title: "HORNY_SPIRITS_INTERFACE"
+            },
+            {
+                src: "https://drive.google.com/file/d/1HkNTGbl_e7OnwllHifjV0jCrwPwrxb3E/preview",
+                title: "PRAY_SLAY_DUALITY"
+            },
+            {
+                src: "https://drive.google.com/file/d/1NlOAIDEnCM0XrXUDgS4UtZH-al0OvTOy/preview",
+                title: "COSMIC_DIGITAL_DIMENSION"
+            },
+            {
+                src: "https://drive.google.com/file/d/1GIeOWGeSrFayyxqXfNpCc2o2I5rk1mIk/preview",
+                title: "HONEY_SIN_COLLISION"
+            },
+            {
+                src: "https://drive.google.com/file/d/1K1pJbDxdFwpC1_CXC7OQWHZHg5gdXhFj/preview",
+                title: "GOLD_DIGITAL_ARMOR"
+            },
+            {
+                src: "https://drive.google.com/file/d/1BjPl72HC1gay-WPSWmO5irFB6NLdymTv/preview",
+                title: "RICE_FIELD_MYSTICISM"
+            },
+            {
+                src: "https://drive.google.com/file/d/1pDLMYGnaq5XRaAzuyJ-CHDX0mP2ZzBu1/preview",
+                title: "COLD_BODY_HOT_MILK"
+            },
+            {
+                src: "https://drive.google.com/file/d/1KB8-TYOrd5VOQ94VRT8Tuf5Q3yVeEKYz/preview",
+                title: "TRADITIONAL_OFFERING_2025"
+            },
+            {
+                src: "https://drive.google.com/file/d/1b5L6zsxW1YAFU5KdgYgzmu-Ydosxm5y5/preview",
+                title: "ALGORITHM_ANIMISM"
+            },
+            {
+                src: "https://drive.google.com/file/d/1mKf_w2L5a2bVnLC4X1Xk5UCrT1p27Ofp/preview",
+                title: "CYBER_CULTURAL_FUSION"
+            },
+            {
+                src: "https://drive.google.com/file/d/1mnoEEajSUbpeKHwwRaOYNpi2BAcyrJ6n/preview",
+                title: "HYPNOTIC_SHRINE_MATRIX"
+            },
+            {
+                src: "https://drive.google.com/file/d/1qjDHkPTi37o-eNHNeV8TS0RKepJuuA62/preview",
+                title: "DIGITAL_DEVOTION_CASCADE"
+            },
+            {
+                src: "https://drive.google.com/file/d/13BfR5LMWf2kGmxDfcgzH6afwEMQsBAt1/preview",
+                title: "SACRED_CODE_TRANSMISSION"
+            }
+        ];
+
+        let currentImageIndex = 0;
+        const lightbox = document.getElementById('lightbox');
+        const lightboxIframe = document.getElementById('lightbox-iframe');
+        const lightboxTitle = document.getElementById('lightbox-title');
+
+        // Initialize lightbox functionality when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click listeners to all artwork frames
+            const artworkFrames = document.querySelectorAll('.artwork-frame');
+            artworkFrames.forEach((frame, index) => {
+                frame.addEventListener('click', function() {
+                    openLightbox(index);
+                });
+            });
+        });
+
+        // Open lightbox
+        function openLightbox(index) {
+            currentImageIndex = index;
+            lightboxIframe.src = artworks[index].src;
+            lightboxTitle.textContent = artworks[index].title;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Close lightbox
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+            lightboxIframe.src = '';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Previous image
+        function previousImage() {
+            currentImageIndex = (currentImageIndex - 1 + artworks.length) % artworks.length;
+            lightboxIframe.src = artworks[currentImageIndex].src;
+            lightboxTitle.textContent = artworks[currentImageIndex].title;
+        }
+
+        // Next image
+        function nextImage() {
+            currentImageIndex = (currentImageIndex + 1) % artworks.length;
+            lightboxIframe.src = artworks[currentImageIndex].src;
+            lightboxTitle.textContent = artworks[currentImageIndex].title;
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'Escape') {
+                    closeLightbox();
+                } else if (e.key === 'ArrowLeft') {
+                    previousImage();
+                } else if (e.key === 'ArrowRight') {
+                    nextImage();
+                }
+            }
+        });
+
+        // Click outside to close
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        // Cursor trail effect
+        const cursorTrail = document.createElement('div');
+        cursorTrail.className = 'cursor-trail';
+        document.body.appendChild(cursorTrail);
+
+        document.addEventListener('mousemove', (e) => {
+            cursorTrail.style.left = e.clientX + 'px';
+            cursorTrail.style.top = e.clientY + 'px';
+        });
+
+        // Smooth scrolling
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({
+                behavior: 'smooth'
+            });
+        }
+
+        // Random glitch intervals
+        setInterval(() => {
+            const glitchElements = document.querySelectorAll('.glitch');
+            glitchElements.forEach(el => {
+                if (Math.random() > 0.7) {
+                    el.style.transform = `translate(${Math.random() * 4 - 2}px, ${Math.random() * 4 - 2}px)`;
+                    setTimeout(() => {
+                        el.style.transform = 'translate(0, 0)';
+                    }, 200);
+                }
+            });
+        }, 3000);
+
+        // Matrix rain effect
+        function createMatrixRain() {
+            const chars = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ01234567890';
+            for (let i = 0; i < 50; i++) {
+                const drop = document.createElement('div');
+                drop.style.position = 'fixed';
+                drop.style.left = Math.random() * 100 + '%';
+                drop.style.top = '-20px';
+                drop.style.color = '#00ff00';
+                drop.style.fontSize = '14px';
+                drop.style.zIndex = '-1';
+                drop.style.opacity = '0.3';
+                drop.textContent = chars[Math.floor(Math.random() * chars.length)];
+                document.body.appendChild(drop);
+
+                const fallDuration = Math.random() * 3000 + 2000;
+                drop.animate([
+                    { transform: 'translateY(-20px)' },
+                    { transform: `translateY(${window.innerHeight + 20}px)` }
+                ], {
+                    duration: fallDuration,
+                    easing: 'linear'
+                }).onfinish = () => drop.remove();
+            }
+        }
+
+        setInterval(createMatrixRain, 1000);
+    </script>
+</body>
+</html>
